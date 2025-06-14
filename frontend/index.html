@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Instant Glamour Survey</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
+  </head>
+  <body class="bg-gray-100 min-h-screen py-10 px-4">
+    <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-lg p-8 space-y-6">
+      <h1 class="text-3xl font-bold text-center text-purple-700">Instant Glamour Survey</h1>
+      <form id="surveyForm" class="space-y-6">
+        <div id="formPages"></div>
+        <div class="flex justify-between pt-6 border-t">
+          <button type="button" id="prevBtn" class="bg-gray-400 text-white px-5 py-2 rounded hover:bg-gray-500 hidden">Back</button>
+          <button type="button" id="nextBtn" class="bg-purple-600 text-white px-5 py-2 rounded hover:bg-purple-700">Next</button>
+        </div>
+      </form>
+      <div id="responseMsg" class="text-green-600 text-center mt-4 hidden">
+        🎉 Thank you! Your response has been submitted.
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+      const formData = [
+        [
+          { label: "Name", name: "name", type: "text", placeholder: "Enter your name" },
+          { label: "Age", name: "age", type: "select", options: ["Below 18", "19–30", "30 and above"] },
+          { label: "Gender", name: "gender", type: "text", placeholder: "e.g., Male/Female/Other" },
+          { label: "Occupation", name: "occupation", type: "text", placeholder: "What do you do?" },
+          { label: "What is your general interest in fashion?", name: "fashionInterest", type: "textarea", placeholder: "Write your response..." },
+        ],
+        [
+          { label: "How large is your wardrobe?", name: "wardrobeSize", type: "radio", options: ["Small", "Medium", "Large"] },
+          { label: "How do you currently pick your outfit each day?", name: "howDoYouPickOutfits", type: "textarea", placeholder: "Explain..." },
+          { label: "Do you like trying new styles?", name: "doYouLikeTryingNewStyles", type: "radio", options: ["Yes", "No"] },
+          { label: "How often do you shop for clothes?", name: "howOftenDoYouBuyClothes", type: "select", options: ["Weekly", "Monthly", "Rarely", "Only when needed"] },
+          { label: "Do you use fashion/styling apps?", name: "useFashionApps", type: "checkbox-group", options: ["Pinterest", "Instagram", "Polyvore", "Other"] },
+        ],
+        [
+          { label: "Rate your confidence in styling yourself (1–10)", name: "rateFashionConfidence", type: "number", placeholder: "e.g., 7" },
+          { label: "Would a digital wardrobe manager help you?", name: "digitalWardrobeInterest", type: "radio", options: ["True", "False"] },
+          { label: "Do you plan outfits or choose on the spot?", name: "doYouPlanOutfitsAhead", type: "select", options: ["Plan ahead", "Choose on the spot"] },
+          { label: "Where do you get style inspiration?", name: "styleInspirationSources", type: "checkbox-group", options: ["Instagram", "Pinterest", "TikTok", "Friends", "Celebrities"] },
+          { label: "Would you like outfit suggestions based on your mood?", name: "wouldYouUseMoodSuggestions", type: "radio", options: ["Yes", "No", "Maybe"] },
+        ],
+        [
+          { label: "Would you talk to a chatbot stylist?", name: "interestInChatStylist", type: "radio", options: ["Yes", "No"] },
+          { label: "Would you like tools to create your unique style?", name: "wouldYouUseCustomization", type: "radio", options: ["Yes", "No"] },
+          { label: "Are you interested in style update notifications?", name: "areYouInterestedInStyleUpdates", type: "radio", options: ["Yes", "No"] },
+          { label: "Your monthly budget for styling tools/apps?", name: "budgetForStylingTools", type: "number", placeholder: "e.g., 5000" },
+        ],
+        [
+          { label: "Which subscription tier would you prefer?", name: "preferredSubscriptionTier", type: "radio", options: ["Basic", "Regular", "Premium"] },
+          { label: "Would you pay if the service works well?", name: "willingnessToPay", type: "radio", options: ["Yes", "No", "Maybe"] },
+          { label: "Most valuable features in this app?", name: "mostValuedFeatures", type: "checkbox-group", options: ["Mood styling", "Chat stylist", "Outfit planner", "Style tips", "Virtual try-on"] },
+          { label: "If you could change one thing about fashion with a magic wand, what would it be?", name: "futureWish", type: "textarea", placeholder: "Imagine and write..." },
+        ],
+        [
+          { label: "How can we improve the Instant Glamour app?", name: "improvementIdeas", type: "textarea", placeholder: "Your ideas..." },
+          { label: "Any features you wish existed in fashion apps?", name: "suggestions", type: "textarea", placeholder: "Describe them..." },
+        ],
+        [
+          { label: "How do you feel about your current style?", name: "howDoYouFeelAboutCurrentStyle", type: "textarea", placeholder: "Describe your feelings..." },
+          { label: "What is your biggest wardrobe challenge?", name: "biggestWardrobeChallenge", type: "textarea", placeholder: "Describe your challenge..." },
+          { label: "Do you have challenges matching items?", name: "challengesWithMatchingItems", type: "textarea", placeholder: "Describe any matching challenges..." },
+          { label: "Are you interested in event-based styling suggestions?", name: "interestInEventBasedStyling", type: "radio", options: ["Yes", "No"] },
+          { label: "Are you interested in weather-based outfit suggestions?", name: "interestInWeatherBasedSuggestions", type: "radio", options: ["Yes", "No"] },
+          { label: "How comfortable are you with AI styling suggestions?", name: "comfortWithAIStyling", type: "textarea", placeholder: "Share your thoughts..." },
+          { label: "Are you open to sharing photos for better suggestions?", name: "opennessToSharePhotos", type: "radio", options: ["Yes", "No"] },
+          { label: "What would make you trust this app?", name: "whatWouldMakeYouTrustThisApp", type: "textarea", placeholder: "Your answer..." },
+        ]
+      ];
+
+      let currentPage = 0;
+      const formPagesContainer = document.getElementById('formPages');
+
+      function renderFormPages() {
+        formPagesContainer.innerHTML = formData.map((page, i) => `
+          <div class="form-page ${i !== 0 ? 'hidden' : ''} space-y-6" id="page${i}">
+            ${page.map(field => {
+              if (field.type === 'textarea') {
+                return `
+                  <div>
+                    <label class="block text-gray-700 font-medium mb-1">${field.label}</label>
+                    <textarea name="${field.name}" required placeholder="${field.placeholder}" class="w-full border px-4 py-2 rounded focus:ring-2 focus:ring-purple-500"></textarea>
+                  </div>`;
+              }
+              if (field.type === 'select') {
+                return `
+                  <div>
+                    <label class="block text-gray-700 font-medium mb-1">${field.label}</label>
+                    <select name="${field.name}" required class="w-full border px-4 py-2 rounded focus:ring-2 focus:ring-purple-500">
+                      <option value="">-- Select an option --</option>
+                      ${field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                    </select>
+                  </div>`;
+              }
+              if (field.type === 'radio') {
+                return `
+                  <div>
+                    <label class="block text-gray-700 font-medium mb-1">${field.label}</label>
+                    <div class="space-y-1">
+                      ${field.options.map(opt => `
+                        <label class="inline-flex items-center space-x-2">
+                          <input type="radio" name="${field.name}" value="${opt}" required class="form-radio text-purple-600" />
+                          <span>${opt}</span>
+                        </label>
+                      `).join('')}
+                    </div>
+                  </div>`;
+              }
+              if (field.type === 'checkbox-group') {
+                return `
+                  <div>
+                    <label class="block text-gray-700 font-medium mb-1">${field.label}</label>
+                    <div class="space-y-1">
+                      ${field.options.map(opt => `
+                        <label class="inline-flex items-center space-x-2">
+                          <input type="checkbox" name="${field.name}[]" value="${opt}" class="form-checkbox text-purple-600" />
+                          <span>${opt}</span>
+                        </label>
+                      `).join('')}
+                    </div>
+                  </div>`;
+              }
+              return `
+                <div>
+                  <label class="block text-gray-700 font-medium mb-1">${field.label}</label>
+                  <input name="${field.name}" type="${field.type}" required placeholder="${field.placeholder}" class="w-full border px-4 py-2 rounded focus:ring-2 focus:ring-purple-500" />
+                </div>`;
+            }).join('')}
+            ${i === formData.length - 1 ? '<button class="w-full bg-purple-600 text-white py-3 rounded font-semibold hover:bg-purple-700" type="submit">Submit</button>' : ''}
+          </div>`).join('');
+      }
+
+      function showPage(index) {
+        document.querySelectorAll('.form-page').forEach((page, i) => page.classList.toggle('hidden', i !== index));
+        document.getElementById('prevBtn').classList.toggle('hidden', index === 0);
+        document.getElementById('nextBtn').textContent = index === formData.length - 1 ? 'Review & Submit' : 'Next';
+      }
+
+      function validatePage(index) {
+        const currentInputs = document.querySelectorAll(`#page${index} input:required, #page${index} textarea:required, #page${index} select:required`);
+        for (const input of currentInputs) {
+          if (
+            (input.type === 'checkbox' && !Array.from(document.getElementsByName(input.name)).some(i => i.checked)) ||
+            (input.type !== 'checkbox' && !input.value.trim())
+          ) {
+            toastr.warning('Please fill all required fields.');
+            return false;
+          }
+        }
+        return true;
+      }
+
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (validatePage(currentPage)) {
+          if (currentPage < formData.length - 1) {
+            currentPage++;
+            showPage(currentPage);
+          } else {
+            document.getElementById('surveyForm').requestSubmit();
+          }
+        }
+      });
+
+      document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          showPage(currentPage);
+        }
+      });
+
+      document.getElementById('surveyForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {};
+        formData.forEach((val, key) => {
+          if (data[key]) {
+            if (Array.isArray(data[key])) data[key].push(val);
+            else data[key] = [data[key], val];
+          } else {
+            data[key] = val;
+          }
+        });
+
+        try {
+          const res = await fetch('http://localhost:5000/api/survey', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+          if (res.ok) {
+            e.target.reset();
+            document.getElementById('responseMsg').classList.remove('hidden');
+            toastr.success('Form submitted successfully!');
+          } else {
+            toastr.error('Submission failed.');
+          }
+        } catch (err) {
+          console.error(err);
+          toastr.error('Error submitting form.');
+        }
+      });
+
+      renderFormPages();
+      showPage(currentPage);
+    </script>
+  </body>
+</html>
