@@ -9,7 +9,17 @@ import { getAllSurveys } from './backend/controllers/survey.controllers.js';
 
 dotenv.config();
 const app = express();
-app.use(cors());
+
+// Allow only your Vercel frontend
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5500',
+    'https://instanceglamour-lgo9lkk27-olas-projects-43189afa.vercel.app'
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI)
