@@ -15,7 +15,7 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://localhost:5500',
-    'https://instanceglamour-lgo9lkk27-olas-projects-43189afa.vercel.app'
+    'https://instanceglamour-lgo9lkk27-olas-projects-4z3189afa.vercel.app'
   ],
   credentials: true
 }));
