@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import surveyRoutes from './backend/routes/survey.routes.js';
 import adminRoutes from './backend/routes/admin.routes.js';
 import { verifyToken } from './backend/middleware/auth.js';
