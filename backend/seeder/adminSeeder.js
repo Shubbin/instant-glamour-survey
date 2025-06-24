@@ -7,21 +7,23 @@ dotenv.config({ path: '../.env' });
 
 async function seedAdmin() {
   try {
+    const username = "shubbin";
+    const password = "makinde";
     await mongoose.connect(process.env.MONGO_URI);
 
-    const existing = await Admin.findOne({ username: "Admin" });
+    const existing = await Admin.findOne({ username });
     if (existing) {
-      console.log("Admin already exists");
+      console.log(`Admin "${username}" already exists`);
       process.exit();
     }
 
     const admin = new Admin({
-      username: "Admin",
-      password: "makinde",
+      username,
+      password,
     });
 
     await admin.save();
-    console.log("Admin created successfully");
+    console.log(`Admin "${username}" created successfully`);
     process.exit();
   } catch (err) {
     console.error("Error creating admin:", err.message);
