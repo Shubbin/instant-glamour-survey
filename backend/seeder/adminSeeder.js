@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 import Admin from "../models/Admin.models.js";
 
 // Load .env from parent directory
@@ -17,9 +18,12 @@ async function seedAdmin() {
       process.exit();
     }
 
+    // Hash the password before saving!
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const admin = new Admin({
       username,
-      password,
+      password: hashedPassword,
     });
 
     await admin.save();
