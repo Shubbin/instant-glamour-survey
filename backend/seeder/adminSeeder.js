@@ -7,7 +7,7 @@ dotenv.config({ path: '../.env' });
 
 async function seedAdmin() {
   try {
-    const username = "shubbin";
+    const username = "admin";
     const password = "makinde";
     await mongoose.connect(process.env.MONGO_URI);
 
